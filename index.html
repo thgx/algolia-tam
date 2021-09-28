@@ -9,6 +9,11 @@
   <link rel="shortcut icon" href="./favicon.png">
 
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/instantsearch.css@7/themes/algolia-min.css">
+  <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/@algolia/autocomplete-theme-classic"
+        />
+        
   <link rel="stylesheet" href="./src/index.css">
   <link rel="stylesheet" href="./src/app.css">
 
@@ -21,10 +26,13 @@
       <div class="header__logo-container">
         <img class="header__logo" src="src/Assets/logo.svg">
       </div>
+      <div class="autocomplete-query" id="autocomplete-query">
+      </div>
       <div class="header__searchbox-container">
         <div class="header__searchbox" id="searchbox"></div>
-        <div class="autocomplete">
-          <div class="autocomplete_container">
+        <div class="autocomplete" >
+          <div class="autocomplete_container" id="autocomplete">
+            
             <div class="autocomplete__hits" id="autocomplete-hits">
             </div>
           </div>

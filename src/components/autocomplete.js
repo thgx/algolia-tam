@@ -1,11 +1,23 @@
 import algoliasearch from 'algoliasearch';
 import instantsearch from 'instantsearch.js';
+import { autocomplete, getAlgoliaResults } from '@algolia/autocomplete-js';
+import '@algolia/autocomplete-theme-classic';
 
 // Instant Search Widgets
 import { hits, searchBox, configure } from 'instantsearch.js/es/widgets';
 
-// Autocomplete Template
+// Autocomplete Templates
 import autocompleteProductTemplate from '../templates/autocomplete-product';
+import autocompleteSuggestionTemplate from '../templates/autocomplete-suggestion';
+
+// Query suggestions
+import { createQuerySuggestionsPlugin } from '@algolia/autocomplete-plugin-query-suggestions';
+
+// Params
+const appId = '98WT6QNUH0';
+const apiKey = 'f221aad3051fcac0b4f7e43e4fe4fe38';
+const searchIndex = 'algolia-sa-assignment';
+const searchIndexQuery = 'algolia-sa-assignment_query_suggestions2';
 
 /**
  * @class Autocomplete
@@ -27,15 +39,23 @@ class Autocomplete {
    * @return {void}
    */
   _registerClient() {
-    this._searchClient = algoliasearch(
-      'VYLEWMPKEZ',
-      '8940a18fde155adf3f74b0912c267aa4'
-    );
+    this._searchClient = algoliasearch(appId, apiKey);
+    const searchClient = this._searchClient;
 
     this._searchInstance = instantsearch({
-      indexName: 'ecommerce-v2',
+      indexName: searchIndex,
       searchClient: this._searchClient,
     });
+
+    this._querySuggestionsInstance = createQuerySuggestionsPlugin({
+      searchClient,
+      indexName: searchIndexQuery,
+      getSearchParams({ state }) {
+        return { hitsPerPage: state.query ? 5 : 10 };
+      },
+    });
+
+    //console.log(this._querySuggestionsInstance);
   }
 
   /**
@@ -44,6 +64,13 @@ class Autocomplete {
    * @return {void}
    */
   _registerWidgets() {
+    const autoCompleteQuery = autocomplete({
+      container: '#autocomplete-query',
+      plugins: [this._querySuggestionsInstance],
+      openOnFocus: true,
+      templates: { item: autocompleteSuggestionTemplate },
+    });
+
     this._searchInstance.addWidgets([
       configure({
         hitsPerPage: 3,
@@ -56,6 +83,8 @@ class Autocomplete {
         templates: { item: autocompleteProductTemplate },
       }),
     ]);
+    
+
   }
 
   /**
