@@ -69,4 +69,14 @@ Can you fix it please?
 
 Hi Marc,
 
+My name is Thomas, and I will do my best to assist you on this issue.
+Could you give additional details on this issue?
+
+I would need to understand what you would like to achieve, the indexes being used and your code dependencies.
+Any relevant source code used to access our products will be helpful.
+
+Thanks,
+
+Regards,
+Thomas
 
