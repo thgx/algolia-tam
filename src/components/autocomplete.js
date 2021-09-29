@@ -1,18 +1,11 @@
+/** @jsx h */
 import algoliasearch from 'algoliasearch';
 import instantsearch from 'instantsearch.js';
 import { autocomplete, getAlgoliaResults } from '@algolia/autocomplete-js';
 import '@algolia/autocomplete-theme-classic';
-
-// Instant Search Widgets
-import { hits, searchBox, configure } from 'instantsearch.js/es/widgets';
-
-// Autocomplete Templates
-import autocompleteProductTemplate from '../templates/autocomplete-product';
-import autocompleteSuggestionTemplate from '../templates/autocomplete-suggestion';
-
-// Query suggestions
 import { createQuerySuggestionsPlugin } from '@algolia/autocomplete-plugin-query-suggestions';
-
+import { h, Fragment } from 'preact';
+import { createLocalStorageRecentSearchesPlugin } from '@algolia/autocomplete-plugin-recent-searches';
 // Params
 const appId = '98WT6QNUH0';
 const apiKey = 'f221aad3051fcac0b4f7e43e4fe4fe38';
@@ -30,7 +23,6 @@ class Autocomplete {
   constructor() {
     this._registerClient();
     this._registerWidgets();
-    this._startSearch();
   }
 
   /**
@@ -39,23 +31,25 @@ class Autocomplete {
    * @return {void}
    */
   _registerClient() {
-    this._searchClient = algoliasearch(appId, apiKey);
-    const searchClient = this._searchClient;
+    this.searchClient = algoliasearch(appId, apiKey);
 
+    const searchClient = this.searchClient;
     this._searchInstance = instantsearch({
       indexName: searchIndex,
-      searchClient: this._searchClient,
+      searchClient: this.searchClient,
     });
 
     this._querySuggestionsInstance = createQuerySuggestionsPlugin({
       searchClient,
       indexName: searchIndexQuery,
       getSearchParams({ state }) {
-        return { hitsPerPage: state.query ? 5 : 10 };
+        return { hitsPerPage: state.query ? 10 : 15 };
       },
     });
 
-    //console.log(this._querySuggestionsInstance);
+    this._recentSearchesPlugin = createLocalStorageRecentSearchesPlugin({
+      key: 'navbar',
+    });
   }
 
   /**
@@ -64,37 +58,71 @@ class Autocomplete {
    * @return {void}
    */
   _registerWidgets() {
-    const autoCompleteQuery = autocomplete({
+    const searchClient = this.searchClient;
+    autocomplete({
       container: '#autocomplete-query',
-      plugins: [this._querySuggestionsInstance],
+      plugins: [this._querySuggestionsInstance, this._recentSearchesPlugin],
       openOnFocus: true,
-      templates: { item: autocompleteSuggestionTemplate },
+      debug: true,
+      // templates: { item: autocompleteSuggestionTemplate },
+      getSources({ query }) {
+        if (!query) {
+          return [];
+        }
+        return [
+          {
+            sourceId: 'products',
+            getItems() {
+              return getAlgoliaResults({
+                searchClient,
+                queries: [
+                  {
+                    indexName: searchIndex,
+                    query,
+                    params: {
+                      hitsPerPage: 3,
+                      attributesToSnippet: ['name:10'],
+                      snippetEllipsisText: '…',
+                    },
+                  },
+                ],
+              });
+            },
+            templates: {
+              header() {
+                return (
+                  <Fragment>
+                    <span className="aa-SourceHeaderTitle">Products</span>
+                    <div className="aa-SourceHeaderLine" />
+                  </Fragment>
+                );
+              },
+              item(data) {
+                return (
+                  <div class="autocomplete-product">
+                    <div class="autocomplete-product__image-container">
+                      <img class="autocomplete-product__image" src={data.item.image} />
+                    </div>
+                    <div class="autocomplete-product__details">
+                      <h3 class="autocomplete-product__name">
+                        <a href={data.item.url}>{data.item.name}</a>
+                      </h3>
+                      <p class="autocomplete-product__price">{data.item.price} €</p>
+                    </div>
+                  </div>
+                );
+              },
+              noResults() {
+                return 'No products for this query.';
+              },
+            },
+            noResults() {
+              return 'No products for this query.';
+            },
+          },
+        ];
+      },
     });
-
-    this._searchInstance.addWidgets([
-      configure({
-        hitsPerPage: 3,
-      }),
-      searchBox({
-        container: '#searchbox',
-      }),
-      hits({
-        container: '#autocomplete-hits',
-        templates: { item: autocompleteProductTemplate },
-      }),
-    ]);
-    
-
-  }
-
-  /**
-   * @private
-   * Starts instant search after widgets are registered
-   * @return {void}
-   */
-  _startSearch() {
-    this._searchInstance.start();
   }
 }
-
 export default Autocomplete;

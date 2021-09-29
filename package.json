@@ -21,8 +21,10 @@
   "dependencies": {
     "@algolia/autocomplete-js": "^1.4.0",
     "@algolia/autocomplete-plugin-query-suggestions": "^1.4.0",
+    "@algolia/autocomplete-plugin-recent-searches": "^1.4.0",
     "@algolia/autocomplete-theme-classic": "^1.4.0",
     "algoliasearch": "^3.35.1",
-    "instantsearch.js": "^4.0.0"
+    "instantsearch.js": "^4.0.0",
+    "preact": "^10.5.14"
   }
 }
