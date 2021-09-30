@@ -6,6 +6,7 @@ import '@algolia/autocomplete-theme-classic';
 import { createQuerySuggestionsPlugin } from '@algolia/autocomplete-plugin-query-suggestions';
 import { h, Fragment } from 'preact';
 import { createLocalStorageRecentSearchesPlugin } from '@algolia/autocomplete-plugin-recent-searches';
+
 // Params
 const appId = '98WT6QNUH0';
 const apiKey = 'f221aad3051fcac0b4f7e43e4fe4fe38';
